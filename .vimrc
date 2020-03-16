@@ -14,6 +14,7 @@ set showcmd
 " クリップボード共有
 set clipboard+=unnamed
 " ファイル作成時にテンプレートを貼り付ける
+" cpp
 autocmd BufNewFile *.cpp 0r ~/.vim/TemplatesForCP/template.cpp
 " バックスペース有効化
 set backspace=indent,eol,start
@@ -37,11 +38,12 @@ set showmatch
 set laststatus=2
 " コマンドラインの補完
 set wildmode=list:longest
+" コマンドラインモードで<Tab>キーによるファイル名補完を有効にする
+set wildmenu
 " 折り返し時に表示行単位での移動できるようにする
 set t_Co=256
 nnoremap j gj
 nnoremap k gk
-
 
 " Tab系
 " 不可視文字を可視化(タブが「▸-」と表示される)
@@ -52,7 +54,6 @@ set expandtab
 set tabstop=2
 " 行頭でのTab文字の表示幅
 set shiftwidth=2
-
 
 " 検索系
 " 検索文字列が小文字の場合は大文字小文字を区別なく検索する
@@ -75,179 +76,117 @@ inoremap (<Enter> ()<Left><CR><ESC><S-o>
 " inoremap ' ''<Left><CR><ESC><S-o>
 inoremap <C-@> <ESC>
 
-"dein Scripts-----------------------------
-if &compatible
-    set nocompatible               " Be iMproved
-endif
+" for <Leader> replacement
+let mapleader = ","
 
-let s:dein_path = expand('~/.cache/dein')
-let s:dein_repo_path = s:dein_path . '/repos/github.com/Shougo/dein.vim'
+" 変数定義
+let $LIBRARY = expand("~/Documents/kyopuro/Library")
 
-if &runtimepath !~# '/dein.vim'
-  if !isdirectory(s:dein_repo_path)
-    execute '!git clone https://github.com/Shougo/dein.vim' s:dein_repo_path
-  endif
-  execute 'set runtimepath^=' . fnamemodify(s:dein_repo_path, ':p')
-endif
+" ============================================================
+call plug#begin()
+" ファイルのツリーを表示
+Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
+nnoremap <silent><C-e> :NERDTreeToggle<CR>
 
-if dein#load_state(s:dein_path)
-  call dein#begin(s:dein_path)
-
-  let g:config_dir  = expand('~/.cache/userconfig')
-  let s:toml        = g:config_dir . '/plugin.toml'
-  let s:lazy_toml   = g:config_dir . '/plugin_lazy.toml'
-
-  " TOML 読み込み
-  call dein#load_toml(s:toml,      {'lazy': 0})
-  call dein#load_toml(s:lazy_toml, {'lazy': 1})
-
-  call dein#end()
-  call dein#save_state()
-endif
-
-" Required:
-filetype plugin indent on
-syntax enable
-" If you want to install not installed plugins on startup.
-if dein#check_install()
-  call dein#install()
-endif
-"End dein Scripts-------------------------
-
-" Note: Skip initialization for vim-tiny or vim-small.
- if 0 | endif
-
- if &compatible
-   set nocompatible               " Be iMproved
- endif
-
- " Required:
- set runtimepath+=~/.vim/bundle/neobundle.vim/
-
- " Required:
- call neobundle#begin(expand('~/.vim/bundle/'))
-
- " Let NeoBundle manage NeoBundle
- " Required:
- NeoBundleFetch 'Shougo/neobundle.vim'
- NeoBundle 'Shougo/vimproc', {
-  \ 'build' : {
-    \ 'windows' : 'make -f make_mingw32.mak',
-    \ 'cygwin' : 'make -f make_cygwin.mak',
-    \ 'mac' : 'make -f make_mac.mak',
-    \ 'unix' : 'make -f make_unix.mak',
-  \ },
-\ }
-
-if has('lua') " lua機能が有効になっている場合・・・・・・①
-    " コードの自動補完
-    NeoBundle 'Shougo/neocomplete.vim'
-    " スニペットの補完機能
-    NeoBundle "Shougo/neosnippet"
-    " スニペット集
-    NeoBundle 'Shougo/neosnippet-snippets'
-endif
-
-" settings for neocomplete, neosnippet
-if neobundle#is_installed('neocomplete.vim')
-    " Vim起動時にneocompleteを有効にする
-    let g:neocomplete#enable_at_startup = 1
-    " smartcase有効化. 大文字が入力されるまで大文字小文字の区別を無視する
-    let g:neocomplete#enable_smart_case = 1
-    " 3文字以上の単語に対して補完を有効にする
-    let g:neocomplete#min_keyword_length = 3
-    " 区切り文字まで補完する
-    let g:neocomplete#enable_auto_delimiter = 1
-    " 1文字目の入力から補完のポップアップを表示
-    let g:neocomplete#auto_completion_start_length = 1
-    " バックスペースで補完のポップアップを閉じる
-    inoremap <expr><BS> neocomplete#smart_close_popup()."<C-h>"
-
-    imap <expr><CR> neosnippet#expandable() ? "<Plug>(neosnippet_expand_or_jump)" : pumvisible() ? "<C-y>" : "<CR>"
-    imap <expr><TAB> pumvisible() ? "<C-n>" : neosnippet#jumpable() ? "<Plug>(neosnippet_expand_or_jump)" : "<TAB>"
-endif
- " Plugins ---------------------------------
- " Refer to |:NeoBundle-examples|.
- " Note: You don't set neobundle setting in .gvimrc!
-
-" ファイルをtree表示してくれる
-NeoBundle 'scrooloose/nerdtree'
-" Ctrl+eで開く
- nnoremap <silent><C-e> :NERDTreeToggle<CR>
- " color scheme
-NeoBundle 'tomasr/molokai'
-NeoBundle 'Townk/vim-autoclose'
-NeoBundle 'morhetz/gruvbox'
-NeoBundle 'sickill/vim-monokai'
-NeoBundle 'Vimjas/vim-python-pep8-indent'
-NeoBundle 'hashivim/vim-terraform'
-NeoBundle 'fatih/vim-go'
-NeoBundle 'prabirshrestha/async.vim'
-NeoBundle 'prabirshrestha/asyncomplete.vim'
-NeoBundle 'prabirshrestha/asyncomplete-lsp.vim'
-NeoBundle 'prabirshrestha/vim-lsp'
-NeoBundleLazy 'junegunn/vim-easy-align', {
-  \ 'autoload': {
-  \   'commands' : ['EasyAlign'],
-  \   'mappings' : ['<Plug>(EasyAlign)'],
-  \ }}
-
+" gruvboxカラースキーム
+Plug 'morhetz/gruvbox'
+" terraform用プラグイン
+Plug 'hashivim/vim-terraform'
+" コードの自動補完用プラグイン
+Plug 'prabirshrestha/async.vim'
+Plug 'prabirshrestha/vim-lsp'
+Plug 'prabirshrestha/asyncomplete.vim'
+Plug 'prabirshrestha/asyncomplete-lsp.vim'
+Plug 'mattn/vim-lsp-settings'
+Plug 'mattn/vim-lsp-icons'
+" Go: import支援
+Plug 'mattn/vim-goimports'
+" 整形
+Plug 'junegunn/vim-easy-align', { 'on': 'EasyAlign' }
+" 範囲指定 + Enterで整形
+vmap <Enter> <Plug>(EasyAlign)
 " C++ Syntax checking
 if has('job') && has('channel') && has('timers')
-  NeoBundle 'w0rp/ale'
+  Plug 'w0rp/ale'
 else
-  NeoBundle 'vim-syntastic/syntastic'
+  Plug 'vim-syntastic/syntastic'
+endif
+" ステータスライン
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+call plug#end()
+
+" settings for plugins ======================================
+" vim-lsp
+nmap <silent> gd :LspDefinition<CR>
+nmap <silent> <f2> :LspRename<CR>
+nmap <silent> <Leader>d :LspTypeDefinition<CR>
+nmap <silent> <Leader>r :LspReferences<CR>
+nmap <silent> <Leader>i :LspImplementation<CR>
+" when using ale, turn off
+let g:lsp_diagnostics_enabled = 1
+let g:lsp_diagnostics_echo_cursor = 1
+let g:lsp_virtual_text_enabled = 0
+let g:lsp_signs_enabled = 1
+let g:lsp_signs_error = {'text': '✘'}
+let g:lsp_signs_warning = {'text': '!!'}
+let g:lsp_log_verbose = 1
+let g:lsp_log_file = expand('~/.vim/vim-lsp.log')
+
+" オムニ補完
+autocmd FileType typescript setlocal omnifunc=lsp#complete
+
+if executable('clangd')
+   au User lsp_setup call lsp#register_server({
+      \ 'name': 'clangd',
+      \ 'cmd': {server_info->['clangd', '--compile-commands-dir', expand('~/.vim/TemplatesForCP')]},
+      \ 'whitelist': ['c', 'cpp', 'objc', 'objcpp', 'cc'],
+      \ })
 endif
 
-" ALE for C++
-let g:ale_completion_enabled = 1
+" asyncomplete.vim
+inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+inoremap <expr> <cr>    pumvisible() ? "\<C-y>" : "\<cr>"
+autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
+
+" ale
+let g:ale_lint_on_save = 1
+let g:ale_lint_on_text_changed = 1
+let g:ale_lint_on_insert_leave = 1
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
-" let g:ale_c_clang_options = "-std=c++14 -I/usr/local/include"
-let g:ale_cpp_clang_options = "-std=c++14 -I/usr/local/include"
 let g:ale_statusline_format = ['⨉ %d', '⚠ %d', '⬥ ok']
 let g:ale_linters = {
     \   'c' : ['clangd'],
     \   'cpp' : ['clangd']
 \}
+augroup compileflag-text
+    autocmd!
+    autocmd BufNewFile,BufReadPost * call s:compileflag_text(expand('~/.vim/TemplatesForCP/'))
+augroup END
 
-" using language-server
-let g:lsp_diagnostics_enabled = 0
-let g:lsp_log_verbose = 1       " debug
-let g:lsp_log_file = expand('~/.vim/vim-lsp.log')
-" let g:asyncomplete_log_file = expand('~/asyncomplete.log')
-
-if executable('gopls')
-    au User lsp_setup call lsp#register_server({
-        \ 'name': 'gopls',
-        \ 'cmd': {server_info->['gopls', '-mode', 'stdio']},
-        \ 'whitelist': ['go'],
-        \ })
-endif
-
-" vim-easy-align {{{
-vmap <Enter> <Plug>(EasyAlign)
-nmap <Leader>a <Plug>(EasyAlign)
-" }}}
-
-" syntasticを入れると、cppのシンタックスチェックがめちゃくちゃになるゾ☆
-" NeoBundle 'scrooloose/syntastic'
-" let g:syntastic_python_checkers = ['pyflakes', 'pep8']
-
-" lightline.vim 設定
-NeoBundle 'itchyny/lightline.vim'
-let g:lightline = {
-      \ 'colorscheme': 'wombat'
-      \ }
+function! s:compileflag_text(loc)
+    let files = findfile('compile_flags.txt', escape(a:loc, ' ') . ';', -1)
+    for i in reverse(filter(files, 'filereadable(v:val)'))
+        let g:ale_cpp_clang_options = system("cat " . i . "| tr '\\n' ' '")
+        let g:ale_cpp_gcc_options = system("cat " . i . "| tr '\\n' ' '")
+    endfor
+endfunction
 
 " terraform vim
 let g:terraform_align=1
 let g:terraform_fmt_on_save=1
 
-" vim-go setting
-let g:go_template_autocreate = 0
-let g:go_null_module_warning = 0
-let g:go_fmt_command = "goimports"
-let g:go_metalinter_autosave = 1
+" Powerline系フォントを利用する
+set laststatus=2
+let g:airline_powerline_fonts = 1
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#buffer_idx_mode = 1
+let g:airline#extensions#whitespace#mixed_indent_algo = 1
+let g:airline_theme = 'wombat'
+if !exists('g:airline_symbols')
+  let g:airline_symbols = {}
+endif
 " ------------------------------------
 " colorscheme
 " ------------------------------------
@@ -258,11 +197,4 @@ set t_Co=256 " gruvboxをカラースキーマにするときに必要！
 " iTerm2で半透明にしているが、vimのcolorschemeを設定すると背景も変更されるため
 highlight Normal ctermbg=none
 
-call neobundle#end()
-
-" Required:
 filetype plugin indent on
-
-" If there are uninstalled bundles found on startup,
-" this will conveniently prompt you to install them.
-NeoBundleCheck
