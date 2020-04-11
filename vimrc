@@ -15,7 +15,7 @@ set showcmd
 set clipboard+=unnamed
 " ファイル作成時にテンプレートを貼り付ける
 " cpp
-autocmd BufNewFile *.cpp 0r ~/.vim/TemplatesForCP/template.cpp
+autocmd BufNewFile *.cpp 0r ~/.vim/template/template.cpp
 " バックスペース有効化
 set backspace=indent,eol,start
 
@@ -46,14 +46,38 @@ nnoremap j gj
 nnoremap k gk
 
 " Tab系
-" 不可視文字を可視化(タブが「▸-」と表示される)
-set list listchars=tab:\▸\-
-" Tab文字を半角スペースにする
-set expandtab
+" 不可視文字を可視化
+" https://blog.delphinus.dev/2011/08/display-invisible-characters-on-vim.html
+set list
+set listchars=tab:»-,trail:-,eol:↲,extends:»,precedes:«,nbsp:%
+" 全角スペース・行末のスペース・タブの可視化
+if has("syntax")
+    syntax on
+ 
+    " PODバグ対策
+    syn sync fromstart
+ 
+    function! ActivateInvisibleIndicator()
+        " 下の行の"　"は全角スペース
+        syntax match InvisibleJISX0208Space "　" display containedin=ALL
+        highlight InvisibleJISX0208Space term=underline ctermbg=Blue guibg=darkgray gui=underline
+        "syntax match InvisibleTrailedSpace "[ \t]\+$" display containedin=ALL
+        "highlight InvisibleTrailedSpace term=underline ctermbg=Red guibg=NONE gui=undercurl guisp=darkorange
+        "syntax match InvisibleTab "\t" display containedin=ALL
+        "highlight InvisibleTab term=underline ctermbg=white gui=undercurl guisp=darkslategray
+    endfunction
+ 
+    augroup invisible
+        autocmd! invisible
+        autocmd BufNew,BufRead * call ActivateInvisibleIndicator()
+    augroup END
+endif
 " 行頭以外のTab文字の表示幅（スペースいくつ分）
 set tabstop=2
 " 行頭でのTab文字の表示幅
 set shiftwidth=2
+" smart indent
+set smartindent
 
 " 検索系
 " 検索文字列が小文字の場合は大文字小文字を区別なく検索する
@@ -78,9 +102,6 @@ inoremap <C-@> <ESC>
 
 " for <Leader> replacement
 let mapleader = ","
-
-" 変数定義
-let $LIBRARY = expand("~/Documents/kyopuro/Library")
 
 " ============================================================
 call plug#begin()
@@ -160,9 +181,11 @@ let g:ale_linters = {
     \   'c' : ['clangd'],
     \   'cpp' : ['clangd']
 \}
+
+let s:compileflag_text_path='~'
 augroup compileflag-text
     autocmd!
-    autocmd BufNewFile,BufReadPost * call s:compileflag_text(expand('~/.vim/TemplatesForCP/'))
+    autocmd BufNewFile,BufReadPost * call s:compileflag_text(s:compileflag_text_path)
 augroup END
 
 function! s:compileflag_text(loc)
