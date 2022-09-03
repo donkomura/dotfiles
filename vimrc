@@ -52,25 +52,25 @@ set list
 set listchars=tab:»-,trail:-,eol:↲,extends:»,precedes:«,nbsp:%
 " 全角スペース・行末のスペース・タブの可視化
 if has("syntax")
-    syntax on
- 
-    " PODバグ対策
-    syn sync fromstart
- 
-    function! ActivateInvisibleIndicator()
-        " 下の行の"　"は全角スペース
-        syntax match InvisibleJISX0208Space "　" display containedin=ALL
-        highlight InvisibleJISX0208Space term=underline ctermbg=Blue guibg=darkgray gui=underline
-        "syntax match InvisibleTrailedSpace "[ \t]\+$" display containedin=ALL
-        "highlight InvisibleTrailedSpace term=underline ctermbg=Red guibg=NONE gui=undercurl guisp=darkorange
-        "syntax match InvisibleTab "\t" display containedin=ALL
-        "highlight InvisibleTab term=underline ctermbg=white gui=undercurl guisp=darkslategray
-    endfunction
- 
-    augroup invisible
-        autocmd! invisible
-        autocmd BufNew,BufRead * call ActivateInvisibleIndicator()
-    augroup END
+	syntax on
+
+	" PODバグ対策
+	syn sync fromstart
+
+	function! ActivateInvisibleIndicator()
+		" 下の行の"　"は全角スペース
+		syntax match InvisibleJISX0208Space "　" display containedin=ALL
+		highlight InvisibleJISX0208Space term=underline ctermbg=Blue guibg=darkgray gui=underline
+		"syntax match InvisibleTrailedSpace "[ \t]\+$" display containedin=ALL
+		"highlight InvisibleTrailedSpace term=underline ctermbg=Red guibg=NONE gui=undercurl guisp=darkorange
+		"syntax match InvisibleTab "\t" display containedin=ALL
+		"highlight InvisibleTab term=underline ctermbg=white gui=undercurl guisp=darkslategray
+	endfunction
+
+	augroup invisible
+		autocmd! invisible
+		autocmd BufNew,BufRead * call ActivateInvisibleIndicator()
+	augroup END
 endif
 " 行頭以外のTab文字の表示幅（スペースいくつ分）
 set tabstop=2
@@ -81,7 +81,7 @@ set smartindent
 
 " 検索系
 " 検索文字列が小文字の場合は大文字小文字を区別なく検索する
-set ignorecase
+"set ignorecase
 " 検索文字列に大文字が含まれている場合は区別して検索する
 set smartcase
 " 検索文字列入力時に順次対象文字列にヒットさせる
@@ -111,8 +111,6 @@ nnoremap <silent><C-e> :NERDTreeToggle<CR>
 
 " gruvboxカラースキーム
 Plug 'morhetz/gruvbox'
-" terraform用プラグイン
-Plug 'hashivim/vim-terraform'
 " コードの自動補完用プラグイン
 Plug 'prabirshrestha/async.vim'
 Plug 'prabirshrestha/vim-lsp'
@@ -120,6 +118,7 @@ Plug 'prabirshrestha/asyncomplete.vim'
 Plug 'prabirshrestha/asyncomplete-lsp.vim'
 Plug 'mattn/vim-lsp-settings'
 Plug 'mattn/vim-lsp-icons'
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 " Go: import支援
 Plug 'mattn/vim-goimports'
 " 整形
@@ -128,9 +127,9 @@ Plug 'junegunn/vim-easy-align', { 'on': 'EasyAlign' }
 vmap <Enter> <Plug>(EasyAlign)
 " C++ Syntax checking
 if has('job') && has('channel') && has('timers')
-  Plug 'w0rp/ale'
+	Plug 'w0rp/ale'
 else
-  Plug 'vim-syntastic/syntastic'
+	Plug 'vim-syntastic/syntastic'
 endif
 " ステータスライン
 Plug 'vim-airline/vim-airline'
@@ -151,18 +150,18 @@ let g:lsp_virtual_text_enabled = 0
 let g:lsp_signs_enabled = 1
 let g:lsp_signs_error = {'text': '✘'}
 let g:lsp_signs_warning = {'text': '!!'}
-let g:lsp_log_verbose = 1
-let g:lsp_log_file = expand('~/.vim/vim-lsp.log')
+" let g:lsp_log_verbose = 1
+" let g:lsp_log_file = expand('~/.vim/vim-lsp.log')
 
 " オムニ補完
 autocmd FileType typescript setlocal omnifunc=lsp#complete
 
 if executable('clangd')
-   au User lsp_setup call lsp#register_server({
-      \ 'name': 'clangd',
-      \ 'cmd': {server_info->['clangd', '--compile-commands-dir', expand('~/.vim/TemplatesForCP')]},
-      \ 'whitelist': ['c', 'cpp', 'objc', 'objcpp', 'cc'],
-      \ })
+	au User lsp_setup call lsp#register_server({
+				\ 'name': 'clangd',
+				\ 'cmd': {server_info->['clangd', '--compile-commands-dir', expand('~/.vim/TemplatesForCP')]},
+				\ 'whitelist': ['c', 'cpp', 'objc', 'objcpp', 'cc'],
+				\ })
 endif
 
 " asyncomplete.vim
@@ -178,27 +177,23 @@ let g:ale_lint_on_insert_leave = 1
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 let g:ale_statusline_format = ['⨉ %d', '⚠ %d', '⬥ ok']
 let g:ale_linters = {
-    \   'c' : ['clangd'],
-    \   'cpp' : ['clangd']
-\}
+			\   'c' : ['clangd'],
+			\   'cpp' : ['clangd']
+			\}
 
 let s:compileflag_text_path='~'
 augroup compileflag-text
-    autocmd!
-    autocmd BufNewFile,BufReadPost * call s:compileflag_text(s:compileflag_text_path)
+	autocmd!
+	autocmd BufNewFile,BufReadPost * call s:compileflag_text(s:compileflag_text_path)
 augroup END
 
 function! s:compileflag_text(loc)
-    let files = findfile('compile_flags.txt', escape(a:loc, ' ') . ';', -1)
-    for i in reverse(filter(files, 'filereadable(v:val)'))
-        let g:ale_cpp_clang_options = system("cat " . i . "| tr '\\n' ' '")
-        let g:ale_cpp_gcc_options = system("cat " . i . "| tr '\\n' ' '")
-    endfor
+	let files = findfile('compile_flags.txt', escape(a:loc, ' ') . ';', -1)
+	for i in reverse(filter(files, 'filereadable(v:val)'))
+		let g:ale_cpp_clang_options = system("cat " . i . "| tr '\\n' ' '")
+		let g:ale_cpp_gcc_options = system("cat " . i . "| tr '\\n' ' '")
+	endfor
 endfunction
-
-" terraform vim
-let g:terraform_align=1
-let g:terraform_fmt_on_save=1
 
 " Powerline系フォントを利用する
 set laststatus=2
@@ -208,7 +203,7 @@ let g:airline#extensions#tabline#buffer_idx_mode = 1
 let g:airline#extensions#whitespace#mixed_indent_algo = 1
 let g:airline_theme = 'wombat'
 if !exists('g:airline_symbols')
-  let g:airline_symbols = {}
+	let g:airline_symbols = {}
 endif
 " ------------------------------------
 " colorscheme
